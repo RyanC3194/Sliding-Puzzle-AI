@@ -1,14 +1,26 @@
 import random
 import keyboard
-
+import random
 
 class Game:
     def __init__(self, size=4):
         self.size = size
         number = list(range(1, size ** 2))
-        random.shuffle(number)
         number.append(-1)
         self.grid = [number[size * i: size * i + size] for i in range(0, size)]
+        self.shuffle()
+
+    def shuffle(self):
+        for i in range(1000):
+            r = random.randint(0, 3)
+            if r == 0:
+                self.up()
+            if r == 1:
+                self.left()
+            if r == 2:
+                self.right()
+            if r == 3:
+                self.down()
 
     def find_space(self):
         for i, row in enumerate(self.grid):
