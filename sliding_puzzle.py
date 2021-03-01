@@ -2,7 +2,6 @@ import random
 import keyboard
 
 
-
 class Game:
     def __init__(self, size=4):
         self.size = size
@@ -17,7 +16,7 @@ class Game:
                 if element == -1:
                     return i, j
 
-    def on_keypress(self, key):
+    def on_keypress(self, key, p=False):
         if key == 'w':
             self.up()
         if key == 'a':
@@ -26,13 +25,14 @@ class Game:
             self.down()
         if key == 'd':
             self.right()
-        print(self.toString())
-        if (self.is_complete()):
-            print("Completed")
+        if p:
+            print(self.toString())
+        if self.is_complete():
             keyboard.remove_hotkey('a')
-            keyboard.add_hotkey('w')
+            keyboard.remove_hotkey('w')
             keyboard.remove_hotkey('s')
-            keyboard.add_hotkey('d')
+            keyboard.remove_hotkey('d')
+            return True
 
     def up(self):
         i, j = self.find_space()
@@ -62,7 +62,10 @@ class Game:
         arr = []
         for row in self.grid:
             arr.extend(row)
-        return sorted(arr[:-1]) == arr[:-1]
+        return arr[-1] == -1 and sorted(arr[:-1]) == arr[:-1]
+
+    def __str__(self):
+        return self.toString()
 
     def toString(self):
         out = "-" * (self.size * 3 + 1) + "\n"
@@ -86,4 +89,3 @@ class Game:
         keyboard.add_hotkey('a', self.on_keypress, args='a')
         keyboard.add_hotkey('w', self.on_keypress, args='w')
         keyboard.add_hotkey('s', self.on_keypress, args='s')
-
