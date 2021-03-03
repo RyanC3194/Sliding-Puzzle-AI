@@ -1,6 +1,6 @@
-import random
 import keyboard
 import random
+
 
 class Game:
     def __init__(self, size=4):

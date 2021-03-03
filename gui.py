@@ -31,7 +31,8 @@ class GUI:
                     label.destroy()
 
             tk.Label(text="You Won", width=8*self.game.size, height=5*self.game.size).pack()
-        self.update()
+        else:
+            self.update()
 
     def update(self):
         for i, row in enumerate(self.game.grid):
@@ -49,6 +50,6 @@ class GUI:
         keyboard.add_hotkey('s', self.on_keypress, args='s')
         self.window.mainloop()
 
-
-gui = GUI(2)
-gui.run()
+if __name__ == "__main__":
+    gui = GUI()
+    gui.run()
