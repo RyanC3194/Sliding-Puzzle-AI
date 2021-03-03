@@ -5,8 +5,8 @@ import tkinter as tk
 
 
 class GUI:
-    def __init__(self, size=4):
-        self.game = Game(size)
+    def __init__(self, game):
+        self.game = game
         self.window = tk.Tk()
         self.labels = []
         for row in self.game.grid:
@@ -25,7 +25,7 @@ class GUI:
                 label.grid(column=j, row=i)
 
     def on_keypress(self, key):
-        if self.game.on_keypress(key):
+        if self.game.on_keypress(key, gui=True):
             for row in self.labels:
                 for label in row:
                     label.destroy()
@@ -52,5 +52,5 @@ class GUI:
         self.window.mainloop()
 
 if __name__ == "__main__":
-    gui = GUI(2)
+    gui = GUI(Game(4))
     gui.run()

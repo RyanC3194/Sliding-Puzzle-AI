@@ -8,10 +8,34 @@ class Game:
         number = list(range(1, size ** 2))
         number.append(-1)
         self.grid = [number[size * i: size * i + size] for i in range(0, size)]
-        self.shuffle()
+        while self.is_complete():
+            self.shuffle()
+        self.score = 0
+        self.update_score()
+
+
+
+    def get_reward(self):
+        old_score = self.score
+        self.update_score()
+        return self.score - old_score - 1
+
+    def update_score(self):
+        if self.is_complete():
+            self.score = 100000
+            return
+        arr = []
+        for row in self.grid:
+            arr.extend(row)
+        count = 0
+        for i, element in enumerate(arr):
+            if i + 1 == element:
+                count += 1
+        if count ** 2 > self.score:
+            self.score = count ** 2
 
     def shuffle(self):
-        for i in range(1000):
+        for i in range(self.size ** self.size * self.size):
             r = random.randint(0, 3)
             if r == 0:
                 self.up()
@@ -28,48 +52,53 @@ class Game:
                 if element == -1:
                     return i, j
 
-    def on_keypress(self, key, p=False):
+    def on_keypress(self, key, p=False, gui=False):
+        move = False
         if key == 'w':
-            self.up()
+            move = self.up()
         if key == 'a':
-            self.left()
+            move = self.left()
         if key == 's':
-            self.down()
+            move = self.down()
         if key == 'd':
-            self.right()
+            move = self.right()
         if p:
             print(self.toString())
-        if self.is_complete():
-            keyboard.remove_hotkey('a')
-            keyboard.remove_hotkey('w')
-            keyboard.remove_hotkey('s')
-            keyboard.remove_hotkey('d')
-            return True
+        if gui:
+            return self.is_complete()
+        return move
 
     def up(self):
         i, j = self.find_space()
         if i != self.size - 1:
             self.grid[i][j] = self.grid[i + 1][j]
             self.grid[i + 1][j] = -1
+            return True
+        return False
 
     def down(self):
         i, j = self.find_space()
         if i != 0:
             self.grid[i][j] = self.grid[i - 1][j]
             self.grid[i - 1][j] = -1
+            return True
+        return False
 
     def right(self):
         i, j = self.find_space()
         if j != 0:
             self.grid[i][j] = self.grid[i][j - 1]
             self.grid[i][j - 1] = -1
+            return True
+        return False
 
     def left(self):
         i, j = self.find_space()
         if j != self.size - 1:
             self.grid[i][j] = self.grid[i][j + 1]
             self.grid[i][j + 1] = -1
-
+            return True
+        return False
     def is_complete(self):
         arr = []
         for row in self.grid:
@@ -101,3 +130,4 @@ class Game:
         keyboard.add_hotkey('a', self.on_keypress, args='a')
         keyboard.add_hotkey('w', self.on_keypress, args='w')
         keyboard.add_hotkey('s', self.on_keypress, args='s')
+        keyboard.wait()

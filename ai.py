@@ -11,6 +11,7 @@ import time
 import gym
 from gym.utils import seeding
 from gym import spaces
+import tkinter as tk
 
 
 class AI(Game, gym.Env):
@@ -22,23 +23,44 @@ class AI(Game, gym.Env):
         self.observation_space = spaces.Space(np.array(self.grid))
         self.moves_made = 0
         self.reward_range = (0, 100000)
+        self.window = tk.Tk()
+        self.labels = []
+        for row in self.grid:
+            cur = []
+            for element in row:
+                if element != -1:
+                    cur.append(tk.Label(text=str(element), width=8, height=5, borderwidth=1,
+                                        relief="solid"))
+                else:
+                    cur.append(
+                        tk.Label(text="", width=8, height=5, borderwidth=1, relief="solid"))
+            self.labels.append(cur)
+
+        for i, row in enumerate(self.labels):
+            for j, label in enumerate(row):
+                label.grid(column=j, row=i)
 
     def step(self, action):
-        self.on_keypress(['w', 'a', 's', 'd'][action])
+        move = self.on_keypress(['w', 'a', 's', 'd'][action])
         self.moves_made += 1
-        if self.moves_made < 1000:
-            return self.grid, self.get_reward(), self.is_complete(), {}
+        if move:
+            reward = self.get_reward()
         else:
-            return self.grid, self.get_reward(), True, {}
+            reward = -10
+        if self.moves_made < 999:
+            return self.grid, reward, self.is_complete(), {}
+        else:
+            return self.grid, -10000, True, {}
 
-    def run(self):
+    def run(self): # for testing
         done = False
         while not done:
             time.sleep(0.05)
             state, reward, done, info = self.step(self.action_space.sample())
 
     def reset(self):
-        self.__init__(2)
+        self.window.destroy()
+        self.__init__(self.size)
         return np.array(self.grid)
 
     def seed(self, seed=None):
@@ -46,14 +68,21 @@ class AI(Game, gym.Env):
         return [seed]
 
     def render(self, mode='human'):
-        pass
+        for i, row in enumerate(self.grid):
+            for j, element in enumerate(row):
+                if element != -1:
+                    self.labels[i][j]["text"] = element
+                else:
+                    self.labels[i][j]["text"] = ""
+        self.window.update()
+        time.sleep(1)
 
 
 def build_model(state, actions):
     model = Sequential()
     model.add(Flatten(input_shape=(1, state[0], state[1])))
-    model.add(Dense(4, activation='relu'))
-    model.add(Dense(4, activation='relu'))
+    model.add(Dense(8*ai.size, activation='relu'))
+    model.add(Dense(8*ai.size, activation='relu'))
     model.add(Dense(actions, activation="linear"))
     return model
 
@@ -67,12 +96,13 @@ def build_agent(model, actions):
 
 
 def train(dqn):
-    dqn.fit(ai, nb_steps=50000, visualize=False, verbose=1)
-    dqn.save_weights('dqn_weights.h5f', overwrite=True)
+    for i in range(0,100):
+        dqn.fit(ai, nb_steps=5000, visualize=False, verbose=1)
+        dqn.save_weights('2x2/dqn_weights.h5f', overwrite=True)
+        dqn.test(ai, nb_episodes=10, visualize=False)
 
 def test(dqn):
-    dqn.load_weights('dqn_weights.h5f')
-    dqn.test(ai, nb_episodes=5, visualize=False)
+    dqn.test(ai, nb_episodes=10, visualize=True)
 
 
 if __name__ == "__main__":
@@ -80,6 +110,7 @@ if __name__ == "__main__":
 
     model = build_model(np.array(ai.grid).shape, 4)
     dqn = build_agent(model, 4)
-    dqn.compile(Adam(lr=1e-3), metrics=['mae'])
 
+    dqn.compile(Adam(lr=1e-3), metrics=['mae'])
+    dqn.load_weights('2x2/dqn_weights.h5f')
     test(dqn)
