@@ -33,6 +33,7 @@ class GUI:
             tk.Label(text="You Won", width=8*self.game.size, height=5*self.game.size).pack()
         else:
             self.update()
+        print(self.game.get_reward())
 
     def update(self):
         for i, row in enumerate(self.game.grid):
@@ -51,5 +52,5 @@ class GUI:
         self.window.mainloop()
 
 if __name__ == "__main__":
-    gui = GUI()
+    gui = GUI(2)
     gui.run()
