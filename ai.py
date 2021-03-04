@@ -50,7 +50,7 @@ class AI(Game, gym.Env):
         if self.moves_made < max_number_of_move - 1:
             return self.grid, reward, self.is_complete(), {}
         else:
-            return self.grid, -10000, True, {}
+            return self.grid, -(self.size ** 4), True, {}
 
     def run(self):  # for testing
         done = False
@@ -75,14 +75,14 @@ class AI(Game, gym.Env):
                 else:
                     self.labels[i][j]["text"] = ""
         self.window.update()
-        time.sleep(0.5)
+        time.sleep(0.1)
 
 
 def build_model(state, actions):
     model = Sequential()
     model.add(Flatten(input_shape=(1, state[0], state[1])))
-    model.add(Dense(8 * ai.size, activation='relu'))
-    model.add(Dense(8 * ai.size, activation='relu'))
+    model.add(Dense(2 * ((ai.size**2)**2), activation='relu'))
+    model.add(Dense(2 * ((ai.size**2)**2), activation='relu'))
     model.add(Dense(actions, activation="linear"))
     return model
 
@@ -93,9 +93,6 @@ def build_agent(model, actions):
     dqn = DQNAgent(model=model, memory=memory, policy=policy,
                    nb_actions=actions, nb_steps_warmup=10, target_model_update=1e-2)
     return dqn
-
-
-
 
 
 def train(dqn, p=False):
@@ -113,8 +110,8 @@ def test(dqn):
     dqn.test(ai, nb_episodes=10, visualize=True)
 
 
-max_number_of_move = 500
-n = 3
+n = 2
+max_number_of_move = (n ** n) ** 2
 if __name__ == "__main__":
     ai = AI(n)
 
@@ -123,5 +120,5 @@ if __name__ == "__main__":
 
     dqn.compile(Adam(lr=1e-3), metrics=['mae'])
     dqn.load_weights(str(n) + 'x' + str(n) + '/dqn_weights.h5f')
-    # test(dqn)
-    train(dqn)
+    #test(dqn)
+    train(dqn, True)

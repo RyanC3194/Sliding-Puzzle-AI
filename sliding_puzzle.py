@@ -27,7 +27,7 @@ class Game:
 
     def update_score(self):
         if self.is_complete():
-            self.score = 100000
+            self.score = self.size ** 4
             return
         arr = []
         for row in self.grid:
