@@ -17,10 +17,11 @@ class Game:
 
 
     def get_reward(self):
+        old_score = self.score
         self.update_score()
         if self.score > self.max_score:
-            old_score = self.score
-            self.max_score -= self.score
+
+            self.max_score = self.score
             return self.max_score - old_score
         return -1
 
@@ -35,8 +36,7 @@ class Game:
         for i, element in enumerate(arr):
             if i + 1 == element:
                 count += 1
-        if count ** 2 > self.score:
-            self.score = count ** 2
+        self.score = count ** 2
 
     def shuffle(self):
         for i in range(self.size ** self.size * self.size):
