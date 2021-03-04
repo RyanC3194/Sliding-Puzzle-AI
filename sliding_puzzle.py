@@ -17,6 +17,9 @@ class Game:
 
 
     def get_reward(self):
+        if self.is_complete():
+            self.score = self.size ** 4
+            return self.score
         old_score = self.score
         self.update_score()
         if self.score > self.max_score:
@@ -26,9 +29,7 @@ class Game:
         return -1
 
     def update_score(self):
-        if self.is_complete():
-            self.score = self.size ** 4
-            return
+
         arr = []
         for row in self.grid:
             arr.extend(row)
