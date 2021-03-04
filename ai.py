@@ -75,14 +75,14 @@ class AI(Game, gym.Env):
                 else:
                     self.labels[i][j]["text"] = ""
         self.window.update()
-        time.sleep(0.1)
+        time.sleep(0.5)
 
 
 def build_model(state, actions):
     model = Sequential()
     model.add(Flatten(input_shape=(1, state[0], state[1])))
-    model.add(Dense(2 * ((ai.size**2)**2), activation='relu'))
-    model.add(Dense(2 * ((ai.size**2)**2), activation='relu'))
+    model.add(Dense(2 * ((ai.size ** 2) ** 2), activation='relu'))
+    model.add(Dense(2 * ((ai.size ** 2) ** 2), activation='relu'))
     model.add(Dense(actions, activation="linear"))
     return model
 
@@ -103,15 +103,18 @@ def train(dqn, p=False):
         dqn.fit(ai, nb_steps=10000, visualize=False, verbose=1)
         dqn.save_weights(str(n) + 'x' + str(n) + '/dqn_weights.h5f', overwrite=True)
         if p:
-            dqn.test(ai, nb_episodes=10, visualize=False)
+            dqn.test(ai, nb_episodes=5, visualize=False)
 
 
 def test(dqn):
     dqn.test(ai, nb_episodes=10, visualize=True)
 
 
-n = 2
+n = 3
 max_number_of_move = (n ** n) ** 2
+load_weight = True
+test_or_train = False  # True for test, False for train
+
 if __name__ == "__main__":
     ai = AI(n)
 
@@ -119,6 +122,12 @@ if __name__ == "__main__":
     dqn = build_agent(model, 4)
 
     dqn.compile(Adam(lr=1e-3), metrics=['mae'])
-    dqn.load_weights(str(n) + 'x' + str(n) + '/dqn_weights.h5f')
-    #test(dqn)
-    train(dqn, True)
+    if load_weight:
+        try:
+            dqn.load_weights(str(n) + 'x' + str(n) + '/dqn_weights.h5f')
+        finally:
+            pass
+    if test_or_train:
+        test(dqn)
+    else:
+        train(dqn, True)
