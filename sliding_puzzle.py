@@ -12,13 +12,17 @@ class Game:
             self.shuffle()
         self.score = 0
         self.update_score()
+        self.max_score = 0
 
 
 
     def get_reward(self):
-        old_score = self.score
         self.update_score()
-        return self.score - old_score - 1
+        if self.score > self.max_score:
+            old_score = self.score
+            self.max_score -= self.score
+            return self.max_score - old_score
+        return -1
 
     def update_score(self):
         if self.is_complete():
