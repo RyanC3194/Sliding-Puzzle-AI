@@ -47,12 +47,12 @@ class AI(Game, gym.Env):
             reward = self.get_reward()
         else:
             reward = -10
-        if self.moves_made < 999:
+        if self.moves_made < max_number_of_move - 1:
             return self.grid, reward, self.is_complete(), {}
         else:
             return self.grid, -10000, True, {}
 
-    def run(self): # for testing
+    def run(self):  # for testing
         done = False
         while not done:
             time.sleep(0.05)
@@ -75,42 +75,53 @@ class AI(Game, gym.Env):
                 else:
                     self.labels[i][j]["text"] = ""
         self.window.update()
-        time.sleep(1)
+        time.sleep(0.5)
 
 
 def build_model(state, actions):
     model = Sequential()
     model.add(Flatten(input_shape=(1, state[0], state[1])))
-    model.add(Dense(8*ai.size, activation='relu'))
-    model.add(Dense(8*ai.size, activation='relu'))
+    model.add(Dense(8 * ai.size, activation='relu'))
+    model.add(Dense(8 * ai.size, activation='relu'))
     model.add(Dense(actions, activation="linear"))
     return model
 
 
 def build_agent(model, actions):
     policy = BoltzmannQPolicy()
-    memory = SequentialMemory(limit=1000, window_length=1)
+    memory = SequentialMemory(limit=max_number_of_move, window_length=1)
     dqn = DQNAgent(model=model, memory=memory, policy=policy,
                    nb_actions=actions, nb_steps_warmup=10, target_model_update=1e-2)
     return dqn
 
 
-def train(dqn):
-    for i in range(0,100):
-        dqn.fit(ai, nb_steps=5000, visualize=False, verbose=1)
-        dqn.save_weights('2x2/dqn_weights.h5f', overwrite=True)
-        dqn.test(ai, nb_episodes=10, visualize=False)
+
+
+
+def train(dqn, p=False):
+    t = 0
+    while True:
+        t += 1
+        print(t)
+        dqn.fit(ai, nb_steps=10000, visualize=False, verbose=1)
+        dqn.save_weights(str(n) + 'x' + str(n) + '/dqn_weights.h5f', overwrite=True)
+        if p:
+            dqn.test(ai, nb_episodes=10, visualize=False)
+
 
 def test(dqn):
     dqn.test(ai, nb_episodes=10, visualize=True)
 
 
+max_number_of_move = 500
+n = 3
 if __name__ == "__main__":
-    ai = AI(2)
+    ai = AI(n)
 
     model = build_model(np.array(ai.grid).shape, 4)
     dqn = build_agent(model, 4)
 
     dqn.compile(Adam(lr=1e-3), metrics=['mae'])
-    dqn.load_weights('2x2/dqn_weights.h5f')
-    test(dqn)
+    dqn.load_weights(str(n) + 'x' + str(n) + '/dqn_weights.h5f')
+    # test(dqn)
+    train(dqn)
